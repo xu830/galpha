@@ -1,6 +1,6 @@
 // lib/widgets/top_fixed_header.dart
 import 'package:flutter/material.dart';
-import '../../style/app_test_style.dart';//导入应用样式
+import '../../style/app_test_style.dart'; //导入应用样式
 import 'package:flutter_svg/flutter_svg.dart';
 
 class TopFixedHeader extends StatefulWidget {
@@ -22,96 +22,142 @@ class _TopFixedHeaderState extends State<TopFixedHeader> {
     return Container(
       color: colorScheme.background, // 背景色，与 AppBar 类似
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Column( // 使用 Column 垂直排列顶部操作区和导航标签
+      child: Column(
+        // 使用 Column 垂直排列顶部操作区和导航标签
         children: [
           // 第一行：Logo, 链选择, 搜索, 设置, 登录/注册
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               // Logo (左上角小恐龙)
-               SvgPicture.asset('assets/images/logo_small2.svg', width: 24, height: 24),
-              // 链选择器 (SOL 下拉菜单)
-              Expanded( // 使用 Expanded 确保链选择器占用可用空间
-                child: GestureDetector(
-                  onTap: () {
-                    // TODO: 显示链选择的下拉菜单
-                    _showChainSelection(context);
+              SvgPicture.asset(
+                'assets/images/logo_small2.svg',
+                width: 24,
+                height: 24,
+              ),
+              Spacer(),
+              // ===========================================
+              // 使用 PopupMenuButton 实现链选择器
+              // ===========================================
+              Theme(
+                data: Theme.of(context).copyWith(
+                  highlightColor: Colors.transparent,
+                  splashColor: Colors.transparent,
+                ),
+                child: PopupMenuButton<String>(
+                  initialValue: selectedChain, // 初始值
+                  onSelected: (String newValue) {
+                    setState(() {
+                      selectedChain = newValue;
+                    });
+                    print('选择的链: $newValue');
                   },
+                  offset: const Offset(-36, 28),
+
+                  // 自定义按钮（child）的外观
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                    decoration: BoxDecoration(
-                      color:Colors.transparent, // 背景色
-                    ),
+                    // padding: const EdgeInsets.symmetric(
+                    //   horizontal: 12,
+                    //   vertical: 8,
+                    // ),
+                    // decoration: BoxDecoration(
+                    //   color: AppColors.darkCardBackground,
+                    //   borderRadius: BorderRadius.circular(8),
+                    // ),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min, // 确保 Row 不占用过多空间
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        // 链图标
-                        _getChainIcon(selectedChain, size: 16),
+                        _getChainIcon(selectedChain, size: 24),
                         const SizedBox(width: 6),
-                        // 链名称
-                        Text(
-                          selectedChain,
-                          style: textTheme.titleMedium, // 使用主题样式
+                        Text(selectedChain, style: textTheme.titleMedium),
+                        const SizedBox(width: 6),
+                        const Icon(
+                          Icons.keyboard_arrow_down,
+                          color: AppColors.secondaryText,
+                          size: 12,
                         ),
-                        const SizedBox(width: 6),
-                        const Icon(Icons.keyboard_arrow_down, color: AppColors.secondaryText, size: 20),
                       ],
                     ),
                   ),
+                  // 构建菜单项列表
+                  itemBuilder: (BuildContext context) =>
+                      <PopupMenuEntry<String>>[
+                        _buildChainPopupMenuItem('SOL', textTheme),
+                        _buildChainPopupMenuItem('ETH', textTheme),
+                        _buildChainPopupMenuItem('Base', textTheme),
+                        _buildChainPopupMenuItem('BSC', textTheme),
+                        _buildChainPopupMenuItem(
+                          'Tron',
+                          textTheme,
+                        ), // 这里复用之前的 _buildChainMenuItem
+                      ],
+                  // 自定义弹出菜单的样式
+                  // 这个 menuBuilder 可以让你完全控制弹出的 Widget
+                  // 但要实现图片中的圆角和背景，需要更多的包装
+                  // preferredSize: Size.fromWidth(200), // 设置弹出菜单的最小宽度
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ), // 设置圆角
+                  // color: colorScheme.surface, // 设置背景色
                 ),
               ),
 
+              // ===========================================
+              SizedBox(width: 12),
               // 搜索图标
-              IconButton(
-                icon: const Icon(Icons.search),
-                iconSize:14,
-                onPressed: () {
-                  print('点击搜索');
-                },
-                color: colorScheme.onBackground, // 使用主题颜色
-              ),
-
-              // 设置图标
-              IconButton(
-                icon: const Icon(Icons.settings), // 或者 Icons.tune
-                iconSize:14,
-                onPressed: () {
+              GestureDetector(
+                onTap: () {
                   print('点击设置');
                 },
-                color: colorScheme.onBackground,
+                child: Container(child: Icon(Icons.search, size: 14)),
               ),
-
+              SizedBox(width: 12),
+              // 设置图标
+              GestureDetector(
+                onTap: () {
+                  print('点击设置');
+                },
+                child: Container(child: Icon(Icons.settings, size: 14)),
+              ),
+              SizedBox(width: 12),
               // Sign Up 按钮
               ElevatedButton(
                 onPressed: () {
                   print('点击 Sign Up');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.secondary, // 使用主题中的强调色
-                  foregroundColor: colorScheme.onSecondary, // 强调色上的文字颜色
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  minimumSize: Size.zero, // 确保按钮大小适应内容
+                  minimumSize: Size(85, 28),
+                  backgroundColor: AppColors.darkGreyButton, // 使用主题中的强调色
+                  foregroundColor: AppColors.primaryText, // 强调色上的文字颜色
+
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+
                   textStyle: AppTextStyles.caption, // 使用主题中的按钮文本样式
                 ),
                 child: const Text('Sign Up'),
               ),
-
+              SizedBox(width: 10),
               // Log In 按钮
               ElevatedButton(
                 onPressed: () {
                   print('点击 Log In');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.darkCardBackground, // Log In 按钮背景不同
-                  foregroundColor: colorScheme.onSurface, // 按钮文字颜色
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  minimumSize: Size(85, 28),
+                  backgroundColor: Colors.white, // Log In 按钮背景不同
+                  foregroundColor: Colors.black, // 按钮文字颜色
+
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(color: colorScheme.onSurface.withOpacity(0.3), width: 1), // 描边
+                    side: BorderSide(
+                      color: colorScheme.onSurface.withOpacity(0.3),
+                      width: 1,
+                    ), // 描边
                   ),
-                  minimumSize: Size.zero,
+
                   textStyle: AppTextStyles.caption,
                 ),
                 child: const Text('Log In'),
@@ -119,9 +165,9 @@ class _TopFixedHeaderState extends State<TopFixedHeader> {
             ],
           ),
           const SizedBox(height: 12), // 分隔上下两行
-
           // 第二行：导航标签
-          SizedBox( // 使用 SizedBox 限制高度，包含可滚动的标签
+          SizedBox(
+            // 使用 SizedBox 限制高度，包含可滚动的标签
             height: 40, // 标签行的高度
             child: ListView(
               scrollDirection: Axis.horizontal, // 水平滚动
@@ -143,23 +189,75 @@ class _TopFixedHeaderState extends State<TopFixedHeader> {
     );
   }
 
-  // 辅助方法：构建单个标签
+  // 辅助方法：构建 PopupMenuItem
+  PopupMenuItem<String> _buildChainPopupMenuItem(
+    String chain,
+    TextTheme textTheme,
+  ) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return PopupMenuItem<String>(
+      value: chain,
+      child: Builder(
+        builder: (innerContext) {
+          return InkWell(
+            // 这里不需要 onTap，因为它会被 PopupMenuItem 的 onSelected 覆盖
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: 8.0,
+              ), // PopupMenuItem 默认有 padding
+              decoration: BoxDecoration(
+                color: selectedChain == chain
+                    ? Colors.white10
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(8), // 圆角半径为16
+              ),
+              child: Row(
+                children: [
+                  _getChainIcon(chain, size: 24),
+                  const SizedBox(width: 8),
+                  Text(
+                    chain,
+                    style: textTheme.bodyLarge?.copyWith(
+                      color: selectedChain == chain
+                          ? colorScheme.secondary
+                          : colorScheme.onSurface,
+                      fontWeight: selectedChain == chain
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildTab(String title, TextTheme textTheme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: Chip( // Chip 是一个很好的选择，可以自定义形状和颜色
+      child: Chip(
         label: Text(
           title,
           style: textTheme.bodyMedium?.copyWith(
-            color: title == 'Trending' ? AppColors.accentColor : AppColors.primaryText, // 选中效果
-            fontWeight: title == 'Trending' ? FontWeight.bold : FontWeight.normal,
+            color: title == 'Trending'
+                ? AppColors.accentColor
+                : AppColors.primaryText,
+            fontWeight: title == 'Trending'
+                ? FontWeight.bold
+                : FontWeight.normal,
           ),
         ),
-        backgroundColor: AppColors.darkCardBackground, // Chip 背景色
+        backgroundColor: AppColors.darkCardBackground,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
-            color: title == 'Trending' ? AppColors.accentColor : AppColors.darkCardBackground,
+            color: title == 'Trending'
+                ? AppColors.accentColor
+                : AppColors.darkCardBackground,
             width: 1.0,
           ),
         ),
@@ -168,93 +266,24 @@ class _TopFixedHeaderState extends State<TopFixedHeader> {
     );
   }
 
-  // 辅助方法：获取链图标
   Widget _getChainIcon(String chain, {double size = 20}) {
-    // 实际项目中应使用 Image.asset 或 Image.network 加载图片
-    // 这里使用 Icon 作为占位符
     switch (chain) {
       case 'SOL':
-        return Icon(Icons.circle, color: const Color(0xFF9945FF), size: size); // Solana 紫色
+        return Icon(Icons.circle, color: const Color(0xFF9945FF), size: size);
       case 'ETH':
-        return Icon(Icons.circle, color: const Color(0xFF627EEA), size: size); // Ethereum 蓝色
+        return Icon(Icons.circle, color: const Color(0xFF627EEA), size: size);
       case 'Base':
         return Icon(Icons.circle, color: Colors.blueAccent, size: size);
       case 'BSC':
-        return Icon(Icons.circle, color: const Color(0xFFF0B90B), size: size); // BNB 链黄色
+        return Icon(Icons.circle, color: const Color(0xFFF0B90B), size: size);
       case 'Tron':
-        return Icon(Icons.circle, color: const Color(0xFFEE060F), size: size); // Tron 红色
+        return Icon(Icons.circle, color: const Color(0xFFEE060F), size: size);
       default:
-        return Icon(Icons.help_outline, color: AppColors.secondaryText, size: size);
-    }
-  }
-
-  // 模拟显示链选择菜单
-  void _showChainSelection(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.darkCardBackground,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (BuildContext bc) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                leading: _getChainIcon('SOL'),
-                title: Text('SOL', style: Theme.of(context).textTheme.bodyLarge),
-                onTap: () {
-                  setState(() {
-                    selectedChain = 'SOL';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: _getChainIcon('ETH'),
-                title: Text('ETH', style: Theme.of(context).textTheme.bodyLarge),
-                onTap: () {
-                  setState(() {
-                    selectedChain = 'ETH';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: _getChainIcon('Base'),
-                title: Text('Base', style: Theme.of(context).textTheme.bodyLarge),
-                onTap: () {
-                  setState(() {
-                    selectedChain = 'Base';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: _getChainIcon('BSC'),
-                title: Text('BSC', style: Theme.of(context).textTheme.bodyLarge),
-                onTap: () {
-                  setState(() {
-                    selectedChain = 'BSC';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: _getChainIcon('Tron'),
-                title: Text('Tron', style: Theme.of(context).textTheme.bodyLarge),
-                onTap: () {
-                  setState(() {
-                    selectedChain = 'Tron';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
+        return Icon(
+          Icons.help_outline,
+          color: AppColors.secondaryText,
+          size: size,
         );
-      },
-    );
+    }
   }
 }

@@ -10,16 +10,17 @@ class AppColors {
   static const Color accentColor = Color(0xFF67E8AB); // 强调色，例如按钮或高亮
   static const Color darkBackground = Color(0xFF1E1E1E); // 深色背景
   static const Color darkCardBackground = Color(0xFF2B2B2B); // 卡片深色背景
-  static const Color getGreenButton = Color(0xFF99E0BF);//获取绿色按钮颜色
+  static const Color getGreenButton = Color(0xFF99E0BF); //获取绿色按钮颜色
+  static const Color darkGreyButton = Color(0xFF232529);
 }
 
 class AppTextStyles {
   // 通用的基础文本样式
   static const TextStyle baseTextStyle = TextStyle(
-fontFamily: 'monospace',
-                    fontSize: 14,
-                    height: 1.5,
-                    letterSpacing: -0.2,
+    fontFamily: 'monospace',
+    fontSize: 14,
+    height: 1.5,
+    letterSpacing: -0.2,
   );
 
   // 标题样式

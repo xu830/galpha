@@ -39,7 +39,7 @@ class DownloadBanner extends StatelessWidget {
                 
                 Text(
                   'Discover faster, Trading in seconds',
-                  style:AppTextStyles.copyWith(color: Colors.grey,fontWeight: FontWeight.w400,)
+                  style:AppTextStyles.baseTextStyle.copyWith(color: Colors.grey,fontWeight: FontWeight.w400,),
                 ),
               ],
             ),
