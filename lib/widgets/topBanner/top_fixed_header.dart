@@ -4,6 +4,7 @@ import 'package:galpha_test/providers/chain_provider.dart';
 import '../../style/app_test_style.dart'; //导入应用样式
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../mockups/mockup_data.dart';
 
 class TopFixedHeader extends ConsumerStatefulWidget {
   const TopFixedHeader({super.key});
@@ -14,12 +15,42 @@ class TopFixedHeader extends ConsumerStatefulWidget {
 
 class _TopFixedHeaderState extends ConsumerState<TopFixedHeader> {
   @override
+  void initState() {
+    super.initState();
+    // 使用 WidgetsBinding.instance.addPostFrameCallback 确保在 Widget 树构建完成后才进行状态读取和更新
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeSelectedTab();
+    });
+  }
+
+  void _initializeSelectedTab() {
+    // 获取当前选中的链
+    final String currentChain = ref.read(selectedChainProvider);
+    // 获取该链的第一个选项卡作为初始选中项
+    final List<Map<String, String>> initialChainTabs =
+        mockTabs[currentChain] ?? [];
+    if (initialChainTabs.isNotEmpty) {
+      ref
+          .read(selectedTabProvider.notifier)
+          .setSelectedTab(initialChainTabs.first['id']!);
+    } else {
+      ref.read(selectedTabProvider.notifier).setSelectedTab('');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    //获得链的信息
     final String selectedChain = ref.watch(selectedChainProvider);
-    // 获取 ChainProvider 的 notifier 实例，以便调用其方法
     final chainNotifier = ref.read(selectedChainProvider.notifier);
     final List<Map<String, dynamic>> availableChains = chainNotifier
-        .getAllChains(); // 获取所有可用链
+        .getAllChains();
+    //获得tab的信息
+    final List<Map<String, String>> currentChainTabs = chainNotifier
+        .getTabsForCurrentChain();
+    final String selectedTab = ref.watch(selectedTabProvider);
+    final selectedTabNotifier = ref.read(selectedTabProvider.notifier);
+
     // 获取主题中的颜色和文本样式
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
@@ -53,23 +84,29 @@ class _TopFixedHeaderState extends ConsumerState<TopFixedHeader> {
                 child: PopupMenuButton<String>(
                   initialValue: selectedChain, // 初始值
                   onSelected: (String newValue) {
-                    ref
-                        .read(selectedChainProvider.notifier)
-                        .setSelectedChain(newValue);
+                    // ref
+                    //     .read(selectedChainProvider.notifier)
+                    //     .setSelectedChain(newValue);
+                    // print('选择的链: $newValue');
+                    chainNotifier.setSelectedChain(newValue); // 更新选中的链
+
+                    // 获取新链对应的第一个选项卡，并更新 selectedTabProvider
+                    final List<Map<String, String>> newChainTabs =
+                        mockTabs[newValue] ?? [];
+                    if (newChainTabs.isNotEmpty) {
+                      selectedTabNotifier.setSelectedTab(
+                        newChainTabs.first['id']!,
+                      );
+                    } else {
+                      selectedTabNotifier.setSelectedTab(''); // 如果没有选项卡，则清空选中
+                    }
+                    // =======================================================
                     print('选择的链: $newValue');
                   },
                   offset: const Offset(-36, 28),
 
                   // 自定义按钮（child）的外观
                   child: Container(
-                    // padding: const EdgeInsets.symmetric(
-                    //   horizontal: 12,
-                    //   vertical: 8,
-                    // ),
-                    // decoration: BoxDecoration(
-                    //   color: AppColors.darkCardBackground,
-                    //   borderRadius: BorderRadius.circular(8),
-                    // ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -172,21 +209,45 @@ class _TopFixedHeaderState extends ConsumerState<TopFixedHeader> {
           const SizedBox(height: 12), // 分隔上下两行
           // 第二行：导航标签
           SizedBox(
-            // 使用 SizedBox 限制高度，包含可滚动的标签
-            height: 40, // 标签行的高度
-            child: ListView(
-              scrollDirection: Axis.horizontal, // 水平滚动
-              children: [
-                _buildTab('Trending', textTheme),
-                _buildTab('xStocks', textTheme),
-                _buildTab('CopyTrade', textTheme),
-                _buildTab('Snipe', textTheme),
-                _buildTab('Swap', textTheme),
-                _buildTab('Farm', textTheme),
-                _buildTab('Lending', textTheme),
-                _buildTab('NFT', textTheme),
-                _buildTab('Launchpad', textTheme),
-              ],
+            height: 40,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: currentChainTabs.length,
+              itemBuilder: (context, index) {
+                final tabData = currentChainTabs[index];
+                final String tabId = tabData['id']!;
+                final String tabLabel = tabData['label']!;
+                final bool isSelected = tabId == selectedTab;
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: InkWell(
+                    onTap: () {
+                      selectedTabNotifier.setSelectedTab(tabId);
+                      print('点击了选项卡: $tabLabel ($tabId)');
+                    },
+                    borderRadius: BorderRadius.circular(4),
+                    child: Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 0,
+                        vertical: 8,
+                      ),
+                      child: Text(
+                        tabLabel,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: isSelected
+                              ? Colors.white
+                              : AppColors.primaryText.withOpacity(0.7),
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
