@@ -11,6 +11,7 @@ class DownloadBanner extends StatelessWidget {
       color: const Color(0xFF2B2B2B), // Banner 的背景颜色
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           // 左侧的 Logo/图标
           Container(
@@ -24,33 +25,26 @@ class DownloadBanner extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+           const SizedBox(width: 10),
           // 中间的文本内容
-          const Expanded(
+           Container(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   'GMGN App',
-                  style: TextStyle(
-                    color: Color(0xFFF0F5F5),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style:AppTextStyles.baseTextStyle.copyWith(color: Color(0xFFF0F5F5),fontWeight: FontWeight.w600,),
                 ),
-                SizedBox(height: 4),
+                
                 Text(
                   'Discover faster, Trading in seconds',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
+                  style:AppTextStyles.copyWith(color: Colors.grey,fontWeight: FontWeight.w400,)
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          Spacer(),
           // 右侧的 "Get" 按钮
           ElevatedButton(
             onPressed: () {
@@ -63,8 +57,8 @@ class DownloadBanner extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8), // 按钮圆角
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              minimumSize: Size.zero,
+              // padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              minimumSize: Size(80, 36),
             ),
             child: const Text(
               'Get',

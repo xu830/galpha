@@ -16,8 +16,10 @@ class AppColors {
 class AppTextStyles {
   // 通用的基础文本样式
   static const TextStyle baseTextStyle = TextStyle(
-    fontFamily: 'Inter', // 如果有自定义字体，可以在这里设置
-    color: AppColors.primaryText,
+fontFamily: 'monospace',
+                    fontSize: 14,
+                    height: 1.5,
+                    letterSpacing: -0.2,
   );
 
   // 标题样式
