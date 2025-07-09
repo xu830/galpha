@@ -1,20 +1,25 @@
 // lib/widgets/top_fixed_header.dart
 import 'package:flutter/material.dart';
+import 'package:galpha_test/providers/chain_provider.dart';
 import '../../style/app_test_style.dart'; //导入应用样式
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TopFixedHeader extends StatefulWidget {
+class TopFixedHeader extends ConsumerStatefulWidget {
   const TopFixedHeader({super.key});
 
   @override
-  State<TopFixedHeader> createState() => _TopFixedHeaderState();
+  ConsumerState<TopFixedHeader> createState() => _TopFixedHeaderState();
 }
 
-class _TopFixedHeaderState extends State<TopFixedHeader> {
-  String selectedChain = 'SOL'; // 默认选中的链
-
+class _TopFixedHeaderState extends ConsumerState<TopFixedHeader> {
   @override
   Widget build(BuildContext context) {
+    final String selectedChain = ref.watch(selectedChainProvider);
+    // 获取 ChainProvider 的 notifier 实例，以便调用其方法
+    final chainNotifier = ref.read(selectedChainProvider.notifier);
+    final List<Map<String, dynamic>> availableChains = chainNotifier
+        .getAllChains(); // 获取所有可用链
     // 获取主题中的颜色和文本样式
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
@@ -48,9 +53,9 @@ class _TopFixedHeaderState extends State<TopFixedHeader> {
                 child: PopupMenuButton<String>(
                   initialValue: selectedChain, // 初始值
                   onSelected: (String newValue) {
-                    setState(() {
-                      selectedChain = newValue;
-                    });
+                    ref
+                        .read(selectedChainProvider.notifier)
+                        .setSelectedChain(newValue);
                     print('选择的链: $newValue');
                   },
                   offset: const Offset(-36, 28),
@@ -83,14 +88,14 @@ class _TopFixedHeaderState extends State<TopFixedHeader> {
                   // 构建菜单项列表
                   itemBuilder: (BuildContext context) =>
                       <PopupMenuEntry<String>>[
-                        _buildChainPopupMenuItem('SOL', textTheme),
-                        _buildChainPopupMenuItem('ETH', textTheme),
-                        _buildChainPopupMenuItem('Base', textTheme),
-                        _buildChainPopupMenuItem('BSC', textTheme),
-                        _buildChainPopupMenuItem(
-                          'Tron',
-                          textTheme,
-                        ), // 这里复用之前的 _buildChainMenuItem
+                        // ====== 动态生成菜单项 ======
+                        ...availableChains.map((chainData) {
+                          return _buildChainPopupMenuItem(
+                            chainData['name'] as String,
+                            textTheme,
+                          );
+                        }).toList(),
+                        // ==========================
                       ],
                   // 自定义弹出菜单的样式
                   // 这个 menuBuilder 可以让你完全控制弹出的 Widget
@@ -195,6 +200,8 @@ class _TopFixedHeaderState extends State<TopFixedHeader> {
     TextTheme textTheme,
   ) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final String currentSelectedChain = ref.watch(selectedChainProvider);
+    final bool isSelected = currentSelectedChain == chain;
     return PopupMenuItem<String>(
       value: chain,
       child: Builder(
@@ -207,9 +214,7 @@ class _TopFixedHeaderState extends State<TopFixedHeader> {
                 vertical: 8.0,
               ), // PopupMenuItem 默认有 padding
               decoration: BoxDecoration(
-                color: selectedChain == chain
-                    ? Colors.white10
-                    : Colors.transparent,
+                color: isSelected ? Colors.white10 : Colors.transparent,
                 borderRadius: BorderRadius.circular(8), // 圆角半径为16
               ),
               child: Row(
@@ -219,10 +224,10 @@ class _TopFixedHeaderState extends State<TopFixedHeader> {
                   Text(
                     chain,
                     style: textTheme.bodyLarge?.copyWith(
-                      color: selectedChain == chain
+                      color: isSelected
                           ? colorScheme.secondary
                           : colorScheme.onSurface,
-                      fontWeight: selectedChain == chain
+                      fontWeight: isSelected
                           ? FontWeight.bold
                           : FontWeight.normal,
                     ),

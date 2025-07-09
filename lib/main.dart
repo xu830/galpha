@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart'; // 导入主页组件
-import 'style/app_test_style.dart';//导入应用样式
+import 'style/app_test_style.dart'; //导入应用样式
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -30,8 +31,8 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-          brightness: Brightness.dark, 
-          primarySwatch: Colors.blueGrey, 
+        brightness: Brightness.dark,
+        primarySwatch: Colors.blueGrey,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: const HomePage(),
